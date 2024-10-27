@@ -6,10 +6,12 @@ function Message({ content }) {
   return <p>{content}</p>;
 }
 
+const token =
+  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YWE3MDU0YzBiOTEwYmYwN2FjYTY4YSIsImVtYWlsIjoiYW5hc2hhbWVlZDE1OUBnbWFpbC5jb20iLCJyb2xlIjoiU1RVREVOVCIsInByb2ZpbGUiOiI2NmFhNzA1NGMwYjkxMGJmMDdhY2E2OGMiLCJpYXQiOjE3Mjk2MjA1MzEsImV4cCI6MTczMDIyNTMzMX0.y8ZSgzNJCYCBUglH5AeEFqgxAiarWNO2UdBCjx-ptVM";
+
 function Paypal() {
   const initialOptions = {
-    "client-id":
-      "client_id",
+    "client-id": "client-id",
     "disable-funding": "paylater,card",
     currency: "USD",
     "data-page-type": "product-details",
@@ -20,10 +22,11 @@ function Paypal() {
   const [message, setMessage] = useState("");
   const onApprove = async (data, actions) => {
     try {
-      const url = `http://localhost:8000/api/v1/payment/paypal/orders/${data.orderID}/capture`;
+      const url = `http://localhost:8000/api/v1/payment/paypal/tip/orders/${data.orderID}/capture`;
       const response = await fetch(url, {
         method: "POST",
         headers: {
+          Authorization: token,
           "Content-Type": "application/json",
         },
       });
@@ -45,14 +48,8 @@ function Paypal() {
       } else {
         // (3) Successful transaction -> Show confirmation or thank you message
         // Or go to another URL:  actions.redirect('thank_you.html');
-        const transaction = orderData.purchase_units[0].payments.captures[0];
         setMessage(
-          `Transaction ${transaction.status}: ${transaction.id}. See console for all available details`
-        );
-        console.log(
-          "Capture result",
-          orderData,
-          JSON.stringify(orderData, null, 2)
+          `Transaction Completed, See console for all available details`
         );
       }
     } catch (error) {
@@ -64,17 +61,16 @@ function Paypal() {
   const onCreate = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/v1/payment/paypal/checkout/",
+        "http://localhost:8000/api/v1/payment/paypal/tip/checkout/",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: token,
           },
           body: JSON.stringify({
-            id: "YOUR_PRODUCT_ID",
-            quantity: "YOUR_PRODUCT_QUANTITY",
-            hours: 2,
-            tutorId: "66aa7094c0b910bf07aca695",
+            amount: 10,
+            classId: "66bae5225271dc6cb7d363e1",
           }),
         }
       );
